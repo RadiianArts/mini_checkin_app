@@ -176,6 +176,108 @@ pre {
   overflow: hidden;
 }
 
+/* Confidence-based matching styling */
+.confidence-legend {
+  background: #f8f8f8;
+  padding: 10px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.confidence-info {
+  font-size: 14px;
+  color: #555;
+}
+
+.high-confidence {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.medium-confidence {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+.low-confidence {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.contacts-list {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-item {
+  border-radius: 6px;
+  padding: 15px;
+  transition: all 0.2s ease;
+}
+
+.contact-item.high-confidence {
+  background: #e8f5e9;
+  border-left: 4px solid #27ae60;
+}
+
+.contact-item.medium-confidence {
+  background: #fff8e1;
+  border-left: 4px solid #f39c12;
+}
+
+.contact-item.low-confidence {
+  background: #ffebee;
+  border-left: 4px solid #e74c3c;
+}
+
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.contact-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.confidence-score {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.high-confidence .confidence-score {
+  background: #27ae60;
+  color: white;
+}
+
+.medium-confidence .confidence-score {
+  background: #f39c12;
+  color: white;
+}
+
+.low-confidence .confidence-score {
+  background: #e74c3c;
+  color: white;
+}
+
+.contact-details {
+  margin-bottom: 15px;
+}
+
+.confidence-details {
+  margin-top: 10px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+  font-size: 13px;
+  color: #555;
+}
+
 /* Member subscription info styling */
 .member-subscription-info {
   display: flex;
@@ -623,6 +725,27 @@ select, input {
   color: #666;
 }
 
+/* Query details panel styling */
+.query-details-panel {
+  background: #f0f7ff;
+  border-radius: 6px;
+  padding: 15px;
+  margin: 15px 0;
+  border-left: 4px solid #3498db;
+}
+
+.query-details-panel h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #2980b9;
+  font-size: 16px;
+}
+
+.query-details p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
 /* Utility classes */
 .placeholder {
   color: #888;
@@ -689,4 +812,133 @@ select, input {
   0% { opacity: 0.7; }
   50% { opacity: 1; }
   100% { opacity: 0.7; }
+}
+
+/* Debug and Help panel styles */
+.utility-buttons {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.utility-btn {
+  padding: 8px 12px;
+  font-size: 12px;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  cursor: pointer;
+  margin: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.utility-btn:hover {
+  opacity: 1;
+  background: #e0e0e0;
+}
+
+.panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  max-height: 50vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.visible {
+  transform: translateY(0);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #777;
+  padding: 0;
+  margin: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.panel-content {
+  padding: 15px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#debug-content {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 13px;
+  max-height: 40vh;
+  overflow-y: auto;
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.action-btn {
+  background: #4a90e2;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.action-btn:hover {
+  background: #3a7bc8;
+}
+
+.support-info {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f8f8f8;
+  border-left: 3px solid #4a90e2;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none;
 }

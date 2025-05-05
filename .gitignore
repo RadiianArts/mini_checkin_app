@@ -18,6 +18,8 @@ out/
 
 # Credentials and sensitive data
 wix.config.json
+mssql-integration.pdf
+mini_checkin_app.zip
 
 # OS specific files
 .DS_Store

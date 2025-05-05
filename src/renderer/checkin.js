@@ -229,22 +229,91 @@ async function processScan(scan) {
         return;
       }
     
-      // Format the member data for display
+      // Format the member data for display with confidence scores
       let memberHtml = `
         <div class="member-info">
-          <h3>Member Found</h3>
+          <h3>Contacts Found (${memberResult.items.length})</h3>
           <p class="member-source">Source: ${memberResult.source}</p>
-          <div class="member-details">
-            <div class="member-name">${memberResult.items[0].contact?.firstName || 'N/A'} ${memberResult.items[0].contact?.lastName || 'N/A'}</div>
-            <div class="member-id">ID: ${memberResult.items[0]._id || memberResult.items[0].id || 'N/A'}</div>
-            <div class="member-email">Email: ${memberResult.items[0].loginEmail || memberResult.items[0].contact?.emails?.[0] || 'N/A'}</div>
-            <div class="member-status">Status: ${memberResult.items[0].privacyStatus || 'Unknown'}</div>
-            <div class="member-created">Created: ${new Date(memberResult.items[0]._createdDate || memberResult.items[0].createdDate).toLocaleString()}</div>
+          <div class="confidence-legend">
+            <div class="confidence-info">Confidence scores: 
+              <span class="high-confidence">High (60-100)</span> | 
+              <span class="medium-confidence">Medium (35-59)</span> | 
+              <span class="low-confidence">Low (0-34)</span>
+            </div>
           </div>
-          <div class="member-actions">
-            <button class="view-plans-btn" data-member-id="${memberResult.items[0]._id || memberResult.items[0].id}">View Plans</button>
+          <div class="contacts-list">
+      `;
+      
+      // Add each contact with confidence score
+      memberResult.items.forEach((contact, index) => {
+        const confidenceScore = contact._confidence?.score || 0;
+        let confidenceClass = 'low-confidence';
+        
+        if (confidenceScore >= 60) {
+          confidenceClass = 'high-confidence';
+        } else if (confidenceScore >= 35) {
+          confidenceClass = 'medium-confidence';
+        }
+        
+        // Get contact details
+        const contactName = `${contact.info?.name?.first || ''} ${contact.info?.name?.last || ''}`;
+        const contactId = contact._id || contact.id || 'N/A';
+        
+        // Access the email field based on Wix CRM Contacts API structure
+        let contactEmail = 'N/A';
+        
+        // Primary email address is stored in the primaryInfo.email field
+        if (contact.primaryInfo?.email) {
+          contactEmail = contact.primaryInfo.email;
+        }
+        // Check for email in the info.emails array
+        else if (contact.info?.emails && contact.info.emails.length > 0) {
+          // Find the primary email first
+          const primaryEmail = contact.info.emails.find(e => e.primary === true);
+          if (primaryEmail?.email) {
+            contactEmail = primaryEmail.email;
+          } 
+          // If no primary email, use the first one
+          else if (contact.info.emails[0]?.email) {
+            contactEmail = contact.info.emails[0].email;
+          }
+        }
+        // Check for loginEmail field (used for members)
+        else if (contact.loginEmail) {
+          contactEmail = contact.loginEmail;
+        }
+        
+        const contactCreated = new Date(contact._createdDate || contact.createdDate).toLocaleString();
+        
+        // Format confidence details
+        const confidenceDetails = contact._confidence?.details || [];
+        const confidenceDetailsHtml = confidenceDetails.length > 0 ?
+          `<div class="confidence-details">${confidenceDetails.join('<br>')}</div>` : '';
+        
+        // Add this contact to the HTML
+        memberHtml += `
+          <div class="contact-item ${confidenceClass}">
+            <div class="contact-header">
+              <span class="contact-name">${contactName}</span>
+              <span class="confidence-score">Match: ${confidenceScore}%</span>
+            </div>
+            <div class="contact-details">
+              <div class="contact-id">ID: ${contactId}</div>
+              <div class="contact-email">Email: ${contactEmail}</div>
+              <div class="contact-created">Created: ${contactCreated}</div>
+              ${confidenceDetailsHtml}
+            </div>
+            <div class="contact-actions">
+              <button class="view-plans-btn" data-member-id="${contactId}">View Plans</button>
+            </div>
+            <div id="plans-${contactId}" class="contact-plans"></div>
           </div>
-          <div id="plans-${memberResult.items[0]._id || memberResult.items[0].id}" class="member-plans"></div>
+        `;
+      });
+      
+      // Close the contacts list div
+      memberHtml += `
+          </div>
         </div>
       `;
       
@@ -261,11 +330,15 @@ async function processScan(scan) {
             if (plansContainer) {
               plansContainer.innerHTML = '<div class="loading">Loading plans and orders...</div>';
               
-              // Always use direct API for plans and orders as SDK implementation is not yet available
-              const [plansResult, ordersResult] = await Promise.all([
-                window.scanidAPI.getMemberPricingPlans(memberId),
-                window.scanidAPI.listPricingPlanOrders({ filter: { memberId } })
-              ]);
+              // Use the Wix JavaScript SDK to get orders for this contact
+              // The getMemberPricingPlans method now uses the SDK implementation
+              const plansResult = await window.scanidAPI.getMemberPricingPlans(memberId);
+              
+              // Store the response in the lastWixResponse for debugging
+              window.lastWixResponse = { plansResult };
+              
+              // Set ordersResult to plansResult since they're now the same API call
+              const ordersResult = plansResult;
             
             // Log the results for debugging
             console.log('Plans result:', plansResult);
@@ -346,3 +419,103 @@ document.getElementById('scan-btn').addEventListener('click', async () => {
   // This will fetch the latest scan and process it
   await processScan();
 });
+
+// Debug and Help panel functionality
+let lastWixResponse = null;
+let restartCount = 0;
+const sessionKey = 'mini_checkin_restart_count';
+
+// Check if we have a restart count stored in sessionStorage
+if (sessionStorage.getItem(sessionKey)) {
+  restartCount = parseInt(sessionStorage.getItem(sessionKey), 10);
+}
+
+// Debug panel functionality
+const debugBtn = document.getElementById('debug-btn');
+const debugPanel = document.getElementById('debug-panel');
+const closeDebugBtn = document.getElementById('close-debug-btn');
+const debugContent = document.getElementById('debug-content');
+
+debugBtn.addEventListener('click', () => {
+  // Toggle debug panel visibility
+  debugPanel.classList.toggle('visible');
+  
+  // If we have a Wix response, display it
+  if (lastWixResponse) {
+    debugContent.textContent = JSON.stringify(lastWixResponse, null, 2);
+  } else {
+    debugContent.textContent = 'No Wix SDK Response data available yet. Perform a scan to see data.';
+  }
+});
+
+closeDebugBtn.addEventListener('click', () => {
+  debugPanel.classList.remove('visible');
+});
+
+// Help panel functionality
+const helpBtn = document.getElementById('help-btn');
+const helpPanel = document.getElementById('help-panel');
+const closeHelpBtn = document.getElementById('close-help-btn');
+const restartBtn = document.getElementById('restart-btn');
+const supportInfo = document.getElementById('support-info');
+
+helpBtn.addEventListener('click', () => {
+  // Toggle help panel visibility
+  helpPanel.classList.toggle('visible');
+  
+  // Show support info if restart count is at least 1
+  if (restartCount > 0) {
+    supportInfo.classList.remove('hidden');
+  } else {
+    supportInfo.classList.add('hidden');
+  }
+});
+
+closeHelpBtn.addEventListener('click', () => {
+  helpPanel.classList.remove('visible');
+});
+
+restartBtn.addEventListener('click', () => {
+  // Increment restart count and save to sessionStorage
+  restartCount++;
+  sessionStorage.setItem(sessionKey, restartCount.toString());
+  
+  // Show support info if this is at least the first restart
+  if (restartCount > 0) {
+    supportInfo.classList.remove('hidden');
+  }
+  
+  // Request app restart via IPC if in Electron
+  if (window.electronAPI) {
+    window.electronAPI.restartApp();
+  } else {
+    // In web mode, just reload the page
+    window.location.reload();
+  }
+});
+
+// Modify the processScan function to store the Wix response for debugging
+const originalProcessScan = processScan;
+processScan = async function(scan) {
+  const result = await originalProcessScan.apply(this, arguments);
+  
+  // Store the last Wix response for debugging
+  if (window.lastWixResponse) {
+    lastWixResponse = window.lastWixResponse;
+  }
+  
+  return result;
+};
+
+// Modify the showDiagnostics function to capture Wix SDK responses
+const originalShowDiagnostics = processScan.showDiagnostics;
+processScan.showDiagnostics = function(title, data) {
+  // Call the original function
+  originalShowDiagnostics.apply(this, arguments);
+  
+  // If this is a Wix SDK response, store it for debugging
+  if (title.includes('Wix') || title.includes('Member') || title.includes('Contact')) {
+    window.lastWixResponse = data;
+    lastWixResponse = data;
+  }
+};

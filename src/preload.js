@@ -5,7 +5,8 @@ contextBridge.exposeInMainWorld('scanidAPI', {
   getLatestScan: () => ipcRenderer.invoke('scanid:get-latest'),
   findWixMember: (firstName, lastName, dateOfBirth) => ipcRenderer.invoke('wix:find-member', { firstName, lastName, dateOfBirth }),
   searchMemberByNameOrDOB: (name, dob) => ipcRenderer.invoke('wix-direct:search-member', { name, dob }),
-  getMemberPricingPlans: (memberId) => ipcRenderer.invoke('wix-direct:pricing-plans', { memberId })
+  getMemberPricingPlans: (memberId) => ipcRenderer.invoke('wix-sdk:list-pricing-plan-orders', { filter: { buyerIds: [memberId] } }),
+  listPricingPlanOrders: (filter) => ipcRenderer.invoke('wix-sdk:list-pricing-plan-orders', { filter })
 });
 
 // Expose Wix API Explorer functionality
@@ -29,4 +30,9 @@ contextBridge.exposeInMainWorld('wixSdk', {
 // Expose Wix Direct API functionality
 contextBridge.exposeInMainWorld('wixDirect', {
   testApi: (endpoint) => ipcRenderer.invoke('wix-direct:test', { endpoint })
+});
+
+// Expose Electron API functionality
+contextBridge.exposeInMainWorld('electronAPI', {
+  restartApp: () => ipcRenderer.invoke('app:restart')
 });

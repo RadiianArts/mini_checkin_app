@@ -9,13 +9,16 @@
     "open": "node src/web-server.js"
   },
   "dependencies": {
+    "@wix/crm": "^1.0.423",
     "@wix/data": "^1.0.222",
     "@wix/members": "^1.0.0",
+    "@wix/pricing-plans": "^1.0.130",
     "@wix/sdk": "^1.15.18",
     "axios": "^1.6.7",
     "csv-parse": "^5.5.4",
     "electron": "^28.2.0",
     "express": "^4.21.2",
+    "mssql": "^11.0.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }

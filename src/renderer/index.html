@@ -109,6 +109,38 @@
     </div>
   </div>
   
+  <!-- Debug and Help panels -->
+  <div class="utility-buttons">
+    <button id="debug-btn" class="utility-btn">Debug</button>
+    <button id="help-btn" class="utility-btn">Help</button>
+  </div>
+  
+  <!-- Debug Panel -->
+  <div id="debug-panel" class="panel">
+    <div class="panel-header">
+      <h3>Wix SDK Response</h3>
+      <button id="close-debug-btn" class="close-btn">×</button>
+    </div>
+    <div class="panel-content">
+      <pre id="debug-content">No data available yet. Perform a scan to see Wix SDK Response.</pre>
+    </div>
+  </div>
+  
+  <!-- Help Panel -->
+  <div id="help-panel" class="panel">
+    <div class="panel-header">
+      <h3>Help</h3>
+      <button id="close-help-btn" class="close-btn">×</button>
+    </div>
+    <div class="panel-content">
+      <p>Something not working? Try restarting the app:</p>
+      <button id="restart-btn" class="action-btn">Restart</button>
+      <div id="support-info" class="support-info hidden">
+        <p>Did the restart not fix your issues? Contact OMAR MUSTAFA via RADIO if he is on-site OR call 214-734-1748.</p>
+      </div>
+    </div>
+  </div>
+  
   <script src="app.js"></script>
   <script src="checkin.js"></script>
   <script src="api-explorer.js"></script>

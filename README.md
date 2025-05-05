@@ -5,6 +5,7 @@ A check-in application that reads Scan-ID export data from a CSV file and integr
 ## Features
 - Scan ID data parsing from CSV exports
 - Contact verification using Wix CRM Contacts API
+- Confidence-based contact matching with visual indicators
 - Pricing plan retrieval for verified contacts
 - Flexible name matching for better search results
 - API Explorer for testing different Wix API endpoints
@@ -12,13 +13,20 @@ A check-in application that reads Scan-ID export data from a CSV file and integr
 - Proper case conversion for improved contact matching
 
 ## Recent Improvements
+- Added confidence-based contact matching system with color-coded indicators
+- Implemented intelligent scoring algorithm for name and DOB matching
+- Prioritized exact last name matches with partial first name matches
+- Added detailed match explanations showing why contacts were matched
 - Migrated from Wix Members API to CRM Contacts API for all lookups
 - Implemented query builder pattern following Wix documentation
 - Enhanced contact search with first/last name filtering
 - Added test scripts to verify contact search functionality
 - Improved authentication with ApiKeyStrategy and account-level headers
-- Fixed Scan-ID data mapping for proper contact lookup
-- Added detailed diagnostics for API requests and responses
+- Integrated Wix Pricing Plans Orders API using the official Wix JavaScript SDK
+- Added Debug panel for viewing raw API responses during troubleshooting
+- Added Help panel with restart option and support contact information
+- Fixed email display in contact list to properly show primary email addresses
+- Deprecated all direct API calls in favor of the official Wix JavaScript SDK
 
 ## New Account Activation Flow - Explained
 - Check [New Account Activation Flow](./New-Account-Activation-flow.md) for a detailed explanation of the New Account Activation flow (now with a neat flowchart!) 
@@ -27,7 +35,13 @@ A check-in application that reads Scan-ID export data from a CSV file and integr
 - Click "Scan ID" to read the latest scan from the Scan-ID CSV export
 - The app displays the person's name, DOB, ID number, and other details
 - It then searches for matching contacts in Wix using the CRM Contacts API
-- If a match is found, it displays the contact information and their pricing plans
+- Matches are displayed with confidence scores and color-coding:
+  - High confidence (60-100 points): Green
+  - Medium confidence (35-59 points): Yellow
+  - Low confidence (0-34 points): Red
+- Each match shows detailed information about why it was matched
+- Contacts are sorted by confidence score with the best matches first
+- You can select any match to view their pricing plans
 - You can also click "Watch Scan-ID" to monitor for new scans automatically
 
 ## Running the App
